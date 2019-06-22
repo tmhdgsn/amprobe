@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["hook.go"],
+    importpath = "github.com/tmhdgsn/amprobe/hook",
+    visibility = ["//visibility:public"],
+    deps = ["//alert:go_default_library"],
+)
