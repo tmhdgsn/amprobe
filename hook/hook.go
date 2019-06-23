@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/tmhdgsn/amprobe/alert"
+	"github.com/tmhdgsn/amprobe/metrics"
 )
 
 type (
@@ -77,5 +78,6 @@ func (h *Hook) postHandler(w http.ResponseWriter, r *http.Request) {
 
 	h.alerts = append(h.alerts, &m)
 	log.Printf("received alert: %+v\n", m)
+	metrics.AlertsProcessed.Inc()
 
 }
