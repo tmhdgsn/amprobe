@@ -11,7 +11,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//probe:go_default_library",
-        "@prometheus_common//model:go_default_library",
+        "@com_github_prometheus_common//model:go_default_library",
     ],
 )
 

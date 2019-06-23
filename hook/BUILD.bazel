@@ -5,5 +5,8 @@ go_library(
     srcs = ["hook.go"],
     importpath = "github.com/tmhdgsn/amprobe/hook",
     visibility = ["//visibility:public"],
-    deps = ["//alert:go_default_library"],
+    deps = [
+        "//alert:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus/promhttp:go_default_library",
+    ],
 )

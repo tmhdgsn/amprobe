@@ -10,16 +10,16 @@ git_repository(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-http_archive(
+git_repository(
     name = "io_bazel_rules_go",
-    sha256 = "492c3ac68ed9dcf527a07e6a1b2dcbf199c6bf8b35517951467ac32e421c06c1",
-    urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.17.0/rules_go-0.17.0.tar.gz"],
+    remote = "https://github.com/bazelbuild/rules_go.git",
+    tag = "0.18.6",
 )
 
-http_archive(
+git_repository(
     name = "bazel_gazelle",
-    sha256 = "7949fc6cc17b5b191103e97481cf8889217263acf52e00b560683413af204fcb",
-    urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.16.0/bazel-gazelle-0.16.0.tar.gz"],
+    commit = "a8a732e9f358d772df3884c0adeebba60274e780",
+    remote = "https://github.com/bazelbuild/bazel-gazelle.git",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
@@ -35,25 +35,11 @@ gazelle_dependencies()
 load("@bazel_gazelle//:def.bzl", "go_repository")
 
 go_repository(
-    name = "com_github_prometheus_prometheus",
-    importpath = "github.com/prometheus/prometheus",
-    tag = "v2.10.0",
-)
-
-go_repository(
-    name = "com_github_prometheus_common",
-    importpath = "github.com/prometheus/common",
-    tag = "v0.6.0",
-)
-
-go_repository(
     name = "com_github_prometheus_alertmanager",
     importpath = "github.com/prometheus/alertmanager",
     tag = "v0.17.0",
 )
 
-go_repository(
-    name = "com_github_prometheus_client_golang",
-    importpath = "github.com/prometheus/client_golang",
-    tag = "v0.9.4",
-)
+load("//:deps.bzl", "deps")
+
+deps()

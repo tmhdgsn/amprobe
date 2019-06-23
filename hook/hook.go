@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/tmhdgsn/amprobe/alert"
 )
 
@@ -42,6 +44,7 @@ func New(addr string) *Hook {
 
 func (h *Hook) ListenAndServe() error {
 	http.HandleFunc("/alerts", h.alertsHandler)
+	http.Handle("/metrics", promhttp.Handler())
 	return h.s.ListenAndServe()
 }
 
