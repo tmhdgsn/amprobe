@@ -14,22 +14,10 @@ import (
 type (
 	Hook struct {
 		sync.Mutex
-		ticker time.Ticker
-		period time.Duration
 		alerts []*alert.Message
 		s      *http.Server
 	}
 )
-
-// Ticker sets a ticker with the given period.
-func (h *Hook) Ticker(period time.Duration) {
-	h.period = period
-	h.ticker = *time.NewTicker(period)
-}
-
-func (h *Hook) ResetTicker() {
-	h.ticker = *time.NewTicker(h.period)
-}
 
 func (h *Hook) alertsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -85,5 +73,6 @@ func (h *Hook) postHandler(w http.ResponseWriter, r *http.Request) {
 	defer h.Unlock()
 
 	h.alerts = append(h.alerts, &m)
+	log.Printf("received alert: %+v\n", m)
 
 }

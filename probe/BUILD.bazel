@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["probe.go"],
+    importpath = "github.com/tmhdgsn/amprobe/probe",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//hook:go_default_library",
+        "@prometheus_common//model:go_default_library",
+    ],
+)

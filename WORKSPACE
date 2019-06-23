@@ -41,8 +41,13 @@ go_repository(
 )
 
 go_repository(
+    name = "prometheus_common",
+    importpath = "github.com/prometheus/common",
+    tag = "v0.6.0",
+)
+
+go_repository(
     name = "alertmanager",
     importpath = "github.com/prometheus/alertmanager",
     tag = "v0.17.0",
 )
-

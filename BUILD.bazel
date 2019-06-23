@@ -9,7 +9,10 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/tmhdgsn/amprobe",
     visibility = ["//visibility:private"],
-    deps = ["//hook:go_default_library"],
+    deps = [
+        "//probe:go_default_library",
+        "@prometheus_common//model:go_default_library",
+    ],
 )
 
 go_binary(
