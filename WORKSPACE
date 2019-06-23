@@ -35,19 +35,25 @@ gazelle_dependencies()
 load("@bazel_gazelle//:def.bzl", "go_repository")
 
 go_repository(
-    name = "prometheus",
+    name = "com_github_prometheus_prometheus",
     importpath = "github.com/prometheus/prometheus",
     tag = "v2.10.0",
 )
 
 go_repository(
-    name = "prometheus_common",
+    name = "com_github_prometheus_common",
     importpath = "github.com/prometheus/common",
     tag = "v0.6.0",
 )
 
 go_repository(
-    name = "alertmanager",
+    name = "com_github_prometheus_alertmanager",
     importpath = "github.com/prometheus/alertmanager",
     tag = "v0.17.0",
+)
+
+go_repository(
+    name = "com_github_prometheus_client_golang",
+    importpath = "github.com/prometheus/client_golang",
+    tag = "v0.9.4",
 )
