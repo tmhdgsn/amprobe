@@ -10,4 +10,9 @@ var (
 		Name: "alerts_processed_total",
 		Help: "The total number of processed alerts",
 	})
+
+	AlertLatency = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "alert_webook_latency",
+		Help: "The latency from probe sending alert, to arriving at webhook",
+	})
 )

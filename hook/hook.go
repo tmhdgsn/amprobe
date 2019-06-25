@@ -6,9 +6,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/tmhdgsn/amprobe/alert"
 	"github.com/tmhdgsn/amprobe/metrics"
@@ -35,17 +32,14 @@ func (h *Hook) alertsHandler(w http.ResponseWriter, r *http.Request) {
 
 func New(addr string) *Hook {
 	server := &http.Server{
-		Addr:           fmt.Sprintf(":%s", addr),
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		Addr: fmt.Sprintf(":%s", addr),
 	}
 	return &Hook{s: server}
 }
 
-func (h *Hook) ListenAndServe() error {
+func (h *Hook) ListenAndServe(metricsHandler http.Handler) error {
 	http.HandleFunc("/alerts", h.alertsHandler)
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle("/metrics", metricsHandler)
 	return h.s.ListenAndServe()
 }
 

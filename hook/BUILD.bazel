@@ -8,6 +8,5 @@ go_library(
     deps = [
         "//alert:go_default_library",
         "//metrics:go_default_library",
-        "@com_github_prometheus_client_golang//prometheus/promhttp:go_default_library",
     ],
 )

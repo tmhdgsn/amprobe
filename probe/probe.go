@@ -4,19 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
 	"github.com/prometheus/common/model"
-
-	"github.com/tmhdgsn/amprobe/hook"
 )
 
 type (
 	Probe struct {
 		BaseURL *url.URL
-		Hook    *hook.Hook
 		Client  *http.Client
 	}
 
@@ -24,13 +20,11 @@ type (
 )
 
 func New(httpClient *http.Client) *Probe {
-	hook := hook.New("1337")
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 	return &Probe{
 		BaseURL: &url.URL{Scheme: "http", Host: "localhost:9093"},
-		Hook:    hook,
 		Client:  httpClient,
 	}
 }
@@ -59,8 +53,5 @@ func (p *Probe) SendAlerts(alerts Alerts) error {
 
 	fmt.Printf("RESP: %+v\n", resp)
 
-	body, err := ioutil.ReadAll(resp.Body)
-
-	fmt.Printf("RESP: %s\n", body)
 	return nil
 }
