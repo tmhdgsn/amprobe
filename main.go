@@ -1,18 +1,33 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/model"
 
+	"github.com/tmhdgsn/amprobe/config"
 	"github.com/tmhdgsn/amprobe/hook"
 	"github.com/tmhdgsn/amprobe/probe"
 )
 
+var (
+	flgAlertRule = flag.String("alertRule", "rules/alert-0.yaml", "alert rule file")
+)
+
 func main() {
+	flag.Parse()
+
+	ruleFiles := []string{*flgAlertRule}
+
+	rules, errs := config.LoadRules(ruleFiles)
+	if errs != nil {
+		log.Fatalf("err: %s\n", errs[0])
+	}
+
+	fmt.Printf("loaded rules: %+v\n", rules)
 
 	amprobe := probe.New(nil)
 	amhook := hook.New("1337")
@@ -30,7 +45,7 @@ func main() {
 		log.Fatalf("err: %s", err)
 	}
 
-	if err := amhook.ListenAndServe(promhttp.Handler()); err != nil {
+	if err := amhook.ListenAndServe(); err != nil {
 		log.Fatalf("err: %s", err)
 	}
 

@@ -3,9 +3,11 @@ package probe
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/prometheus/common/model"
 )
@@ -14,6 +16,7 @@ type (
 	Probe struct {
 		BaseURL *url.URL
 		Client  *http.Client
+		ticker  *time.Ticker
 	}
 
 	Alerts []model.Alert
@@ -26,6 +29,7 @@ func New(httpClient *http.Client) *Probe {
 	return &Probe{
 		BaseURL: &url.URL{Scheme: "http", Host: "localhost:9093"},
 		Client:  httpClient,
+		ticker:  time.NewTicker(30 * time.Second),
 	}
 }
 
@@ -37,21 +41,33 @@ func (p *Probe) SendAlerts(alerts Alerts) error {
 		return err
 	}
 
-	payload := bytes.NewReader(data)
-	fmt.Printf("alert: %s\n", data)
-	req, err := http.NewRequest("POST", u.String(), payload)
-	if err != nil {
-		return err
+	for {
+		select {
+		case <-p.ticker.C:
+			payload := bytes.NewReader(data)
+			req, err := http.NewRequest("POST", u.String(), payload)
+			if err != nil {
+				return err
+			}
+
+			resp, err := p.Client.Do(req)
+			if err != nil {
+				return err
+			}
+
+			defer resp.Body.Close()
+
+			if resp.StatusCode == http.StatusOK {
+				bytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					log.Fatal(err)
+				}
+				body := string(bytes)
+				log.Print(body)
+			}
+
+		}
 	}
-
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := p.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("RESP: %+v\n", resp)
 
 	return nil
 }

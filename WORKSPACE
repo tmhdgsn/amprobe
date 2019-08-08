@@ -40,6 +40,13 @@ go_repository(
     tag = "v0.17.0",
 )
 
+go_repository(
+    name = "com_github_prometheus_prometheus",
+    build_extra_args = ["--exclude=vendor"],
+    importpath = "github.com/prometheus/prometheus",
+    tag = "v2.10.0",
+)
+
 load("//:deps.bzl", "deps")
 
 deps()

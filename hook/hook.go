@@ -3,28 +3,38 @@ package hook
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/tmhdgsn/amprobe/alert"
-	"github.com/tmhdgsn/amprobe/metrics"
 )
 
 type (
 	Hook struct {
 		sync.Mutex
-		alerts []*alert.Message
+		alerts map[string]*AlertState
 		s      *http.Server
+	}
+
+	AlertState struct {
+		Received time.Time
+		Msg      *alert.Message
 	}
 )
 
 func (h *Hook) alertsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		h.getHandler(w, r)
+		h.get(w, r)
 	case http.MethodPost:
-		h.postHandler(w, r)
+		h.post(w, r)
+	case http.MethodHead:
+		w.WriteHeader(http.StatusAccepted)
 	default:
 		http.Error(w, "unsupported HTTP method", 400)
 	}
@@ -37,13 +47,13 @@ func New(addr string) *Hook {
 	return &Hook{s: server}
 }
 
-func (h *Hook) ListenAndServe(metricsHandler http.Handler) error {
+func (h *Hook) ListenAndServe() error {
 	http.HandleFunc("/alerts", h.alertsHandler)
-	http.Handle("/metrics", metricsHandler)
+	http.Handle("/metrics", promhttp.Handler())
 	return h.s.ListenAndServe()
 }
 
-func (h *Hook) getHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Hook) get(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -55,23 +65,27 @@ func (h *Hook) getHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Hook) postHandler(w http.ResponseWriter, r *http.Request) {
+// post receives the webhook from alertmanager and updates the AlertState
+func (h *Hook) post(w http.ResponseWriter, req *http.Request) {
+	log.Printf("received alert hook %v", req)
 
-	dec := json.NewDecoder(r.Body)
-	defer r.Body.Close()
+	msgBytes, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Printf("error reading message: %v", err)
+		http.Error(w, "invalid request body", 400)
+		return
+	}
 
-	var m alert.Message
-	if err := dec.Decode(&m); err != nil {
-		log.Printf("error decoding message: %v", err)
+	var msg *alert.Message
+	err = json.Unmarshal(msgBytes, msg)
+	if err != nil {
+		log.Printf("error unmarshalling message: %v", err)
 		http.Error(w, "invalid request body", 400)
 		return
 	}
 
 	h.Lock()
 	defer h.Unlock()
-
-	h.alerts = append(h.alerts, &m)
-	log.Printf("received alert: %+v\n", m)
-	metrics.AlertsProcessed.Inc()
-
+	state := &AlertState{Msg: msg, Received: time.Now()}
+	h.alerts[msg.Receiver] = state
 }

@@ -7,12 +7,13 @@ gazelle(name = "gazelle")
 go_library(
     name = "go_default_library",
     srcs = ["main.go"],
+    data = glob(["rules/alert-0.yaml"]),
     importpath = "github.com/tmhdgsn/amprobe",
     visibility = ["//visibility:private"],
     deps = [
+        "//config:go_default_library",
         "//hook:go_default_library",
         "//probe:go_default_library",
-        "@com_github_prometheus_client_golang//prometheus/promhttp:go_default_library",
         "@com_github_prometheus_common//model:go_default_library",
     ],
 )
